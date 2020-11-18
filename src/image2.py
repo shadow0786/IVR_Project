@@ -43,6 +43,10 @@ class image_converter:
     #self.pos_previous = np.array([0.0, 0.0,0.0], dtype='float64')
     #self.W_past = np.array([0.0, 0.0,0.0], dtype='float64')
 
+    # initialize a subscriber to get the position of the orange box for Question 4.2
+    self.box_trajectory_sub = rospy.Subscriber("/target2/box", Float64MultiArray, self.callbackBOX)
+    self.box_coor = np.array([0, 0 , 0])
+
   ##################################### Vision part
   def rotation_matrix_y(self, angle):
     R_y = np.array([[np.cos(angle),0,-np.sin(angle)],
@@ -86,6 +90,9 @@ class image_converter:
 
     return [angle2, angle3 , angle4]
 
+############################################ QUESTION 4.2 : subscribe to get trajectory of the box
+  def callbackBOX(self,data):
+    self.box_coor = np.array(data.data)
 
 
 
@@ -161,7 +168,7 @@ class image_converter:
     pos = self.detect_end_effector(image)
     # desired trajectory
     pos_d = self.trajectory()  ### target Position ball
-    pos_square = self.trajectory1()  ### target Position square
+    pos_square = self.box_coor  ### target Position box
 
     ############################ Used in 4.2
     # W = np.sum((pos - self.pos_square) ** 2)

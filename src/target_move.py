@@ -18,6 +18,10 @@ def move():
   robot_joint4_pub = rospy.Publisher("/target2/x2_position_controller/command", Float64, queue_size=10)
   robot_joint5_pub = rospy.Publisher("/target2/y2_position_controller/command", Float64, queue_size=10)
   robot_joint6_pub = rospy.Publisher("/target2/z2_position_controller/command", Float64, queue_size=10)
+
+  # publish the trajectory of the box in form of an array
+  self.box_trajectory = rospy.Publisher("/target2/box", Float64MultiArray, queue_size=10) 
+  
   t0 = rospy.get_time()
   while not rospy.is_shutdown():
     cur_time = np.array([rospy.get_time()])-t0
@@ -36,6 +40,13 @@ def move():
     robot_joint3_pub.publish(joint3)
     x_d = 2+ 2* np.cos(cur_time * np.pi/15)
     y_d = 2.5+ 1.5* np.sin(cur_time * np.pi/15)
+    
+    ################### publish the trajectory of the box in form of an array Question 4.2
+    target2_trajectory = Float64MultiArray()
+    target2_trajectory.data = np.array(x_d,y_d,7.5)
+    box_trajectory.publish(target2_trajectory)
+    ##################
+    
     joint4=Float64()
     joint4.data=  x_d
     joint5=Float64()
@@ -45,6 +56,10 @@ def move():
     robot_joint4_pub.publish(joint4)
     robot_joint5_pub.publish(joint5)
     robot_joint6_pub.publish(joint6)
+
+
+
+
     rate.sleep()
 
 
