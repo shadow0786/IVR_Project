@@ -43,6 +43,54 @@ class image_converter:
     #self.pos_previous = np.array([0.0, 0.0,0.0], dtype='float64')
     #self.W_past = np.array([0.0, 0.0,0.0], dtype='float64')
 
+  ##################################### Vision part
+  def rotation_matrix_y(self, angle):
+    R_y = np.array([[np.cos(angle),0,-np.sin(angle)],
+                         [0,1,0],
+                         [np.sin(angle), 0, np.cos(angle)]])
+    return R_y
+
+  def rotation_matrix_x(self, angle):
+    R_x = np.array([ [1, 0, 0],
+                     [0, np.cos(angle), -np.sin(angle)],
+                     [0, np.sin(angle), np.cos(angle)]])
+    return R_x
+
+  def get_joint_angles(self, pos_3D_plane):
+    [yellow, blue, green, red] = pos_3D_plane
+    link2 = green - blue
+
+    ### start with joint 2 since joint 1 does not rotate
+    angle2 = atan2(green[2] - blue[2], green[1] - blue[1])     ### should we subtract pi/2  ?
+
+    ####### transform the coordinates into the rotated space
+    rotation_matrix_2 = self.rotation_matrix_x(-angle2)
+    yellow2 = np.dot(rotation_matrix_2,yellow)
+    blue2 = np.dot(rotation_matrix_2, blue)
+    green2 = np.dot(rotation_matrix_2, green)
+    red2 = np.dot(rotation_matrix_2, red)
+
+    ########## calculate joint angle 3 in the new rotated space
+    angle3 = atan2(green2[2] - blue2[2], green2[0] - blue2[0])     ### should we subtract pi/2 ?
+
+    ####### transform the coordinates into the rotated space
+    rotation_matrix_3 = self.rotation_matrix_y(-angle3)
+    yellow3 = np.dot(rotation_matrix_2,yellow2)
+    blue3 = np.dot(rotation_matrix_2, blue2)
+    green3 = np.dot(rotation_matrix_2, green2)
+    red3 = np.dot(rotation_matrix_2, red2)
+
+    ########## calculate joint angle 3 in the new rotated space
+    angle4 = atan2(green3[2] - blue3[2], green3[1] - blue3[1])     ### should we subtract pi/2
+
+
+    return [angle2, angle3 , angle4]
+
+
+
+
+
+
   ############################## THIS IS QUESTION 3.1
   # As a general assumption : joints position and orange sphere/square position are already calculated in functions named
   # Array of 4 joints = detect_joint_angles(image)
